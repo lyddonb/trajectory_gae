@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block title %}       
+Request {{ request.path }}
+{% endblock %}
+
+{% block content %}
+<div id="requests">
+  <div>
+    <label for="host">Host</label>
+    <span id="host" name="host">{{ request.host }}</span
+  </div>
+  <div>
+    <label for="path">Path</label>
+    <span id="path" name="path">{{ request.path }}</span
+  </div>
+  <div>
+    <label for="status">Status</label>
+    <span id="status" name="status">{{ request.status }}</span
+  </div>
+  <div>
+    <label for="timestamp">Timestamp</label>
+    <span id="timestamp" name="timestamp">{{ request.timestamp }}</span
+  </div>
+  <div>
+    <label for="request_id">Request Id</label>
+    <span id="request_id" name="request_id">{{ request.request_id }}</span
+  </div>
+  <div>
+    <label for="job_id">Job_id</label>
+    <span id="job_id" name="job_id">{{ request.job_id }}</span
+  </div>
+  <div>
+    <label for="extra">Extra</label>
+    <span id="extra" name="extra">{{ request.extra }}</span
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+application: trajectory-webapp-example
+version: test
+runtime: python27
+api_version: 1
+threadsafe: true
+
+libraries:
+- name: webob
+  version: latest
+- name: jinja2
+  version: 2.6
+
+builtins:
+- remote_api: on
+
+handlers:
+- url: /examples/.*
+  script: examples.example.app
+  #login: admin
+
+- url: /trajectory/.*
+  script: main.app
+  login: admin

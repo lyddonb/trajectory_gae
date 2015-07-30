@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block title %}       
+Requests
+{% endblock %}
+
+{% block content %}
+<div id="requests">
+  <dl>
+    <dt><h3>{{ error_type|e }} </h3></dt>
+    <dd>
+      <table>
+        <tr>
+          <th>Host</th>
+          <th>Path</th>
+          <th>Status</th>
+          <th>Timestamp</th>
+          <th>Request Id</th>
+          <th>Job Id</th>
+          <th>Parent Id</th>
+        </tr>
+        {% for request in requests %}
+          <tr>
+            <td>{{ request.host }}</td>
+            <td>{{ request.path }}</td>
+            <td>{{ request.status }}</td>
+            <td>{{ request.timestamp }}</td>
+            <td>{{ request.key.id() }}</td>
+            <td>
+              <a href="delete/datastore/">
+                <a href="{{ uri_for("job_request_list_handler",
+                  job_id=request.job_id) }}">
+                  {{request.job_id}}
+              </a>
+            </td>
+            <td>{{ request.parent_id }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </dd>
+  </dl>
+</div>
+{% endblock %}
