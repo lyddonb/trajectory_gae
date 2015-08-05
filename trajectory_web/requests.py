@@ -14,10 +14,15 @@ from webapp2 import uri_for
 
 from .base import BaseHandler
 
-from trajectory.providers.gae import get_request
+from trajectory.providers.gae import get_all_request_parts
 from trajectory.providers.gae import get_all_requests
 from trajectory.providers.gae import get_all_requests_for_job
 from trajectory.providers.gae import get_all_parent_requests
+from trajectory.providers.gae import Node
+from trajectory.providers.gae import NodeRequestBody
+from trajectory.providers.gae import NodeRequestHeaders
+from trajectory.providers.gae import NodeResponseBody
+from trajectory.providers.gae import NodeTracebackBody
 
 
 class RequestListHandler(BaseHandler):
@@ -56,10 +61,31 @@ class RequestHandler(BaseHandler):
         self.render_page(request_id)
 
     def render_page(self, request_id):
-        request = get_request(request_id)
+        node, headers, request, response, traceback = get_all_request_parts(
+            request_id)
+
+        node = node or Node()
+        node.environment = node.environment or {}
+        node.extra = node.extra or {}
+
+        headers = headers or NodeRequestHeaders()
+        headers.headers = headers.headers or {}
+
+        response = response or NodeResponseBody()
+        response.response = response.response or []
+
+        request = request or NodeRequestBody()
+        request.body = request.body or ""
+
+        traceback = traceback or NodeTracebackBody()
+        traceback.traceback = traceback.traceback or []
 
         context = {
-            'request': request,
+            'request': node,
+            'headers': headers,
+            'request_body': request,
+            'response': response,
+            'traceback': traceback,
         }
 
         self.render_template('requests/request.html', **context)
@@ -79,7 +105,8 @@ class JobRequestListHandler(BaseHandler):
         graph = []
 
         for node in nodes:
-            _get_graph_node(graph, node)
+            if node:
+                _get_graph_node(graph, node)
 
         context = {
             'graph': "".join(graph)
