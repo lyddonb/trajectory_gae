@@ -10,9 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-import logging
-
 from trajectory.urlfetch import install_hook as install_urlfetch
 from trajectory.taskqueue import install_hook as install_taskqueue
 from trajectory.middleware import trajectory_wsgi_middleware
@@ -20,7 +17,6 @@ from trajectory.middleware import trajectory_wsgi_middleware
 
 def install(app, with_middleware=False):
     config = {}
-    logging.info(config)
 
     install_urlfetch(config)
     install_taskqueue(config)

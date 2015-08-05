@@ -6,33 +6,154 @@ Request {{ request.path }}
 
 {% block content %}
 <div id="requests">
-  <div>
-    <label for="host">Host</label>
-    <span id="host" name="host">{{ request.host }}</span
-  </div>
-  <div>
-    <label for="path">Path</label>
-    <span id="path" name="path">{{ request.path }}</span
-  </div>
-  <div>
-    <label for="status">Status</label>
-    <span id="status" name="status">{{ request.status }}</span
-  </div>
-  <div>
-    <label for="timestamp">Timestamp</label>
-    <span id="timestamp" name="timestamp">{{ request.timestamp }}</span
-  </div>
-  <div>
-    <label for="request_id">Request Id</label>
-    <span id="request_id" name="request_id">{{ request.request_id }}</span
-  </div>
-  <div>
-    <label for="job_id">Job_id</label>
-    <span id="job_id" name="job_id">{{ request.job_id }}</span
-  </div>
-  <div>
-    <label for="extra">Extra</label>
-    <span id="extra" name="extra">{{ request.extra }}</span
-  </div>
+  <table>
+    <tr>
+      <td>
+        <label for="host"><strong>Host</strong></label>
+      </td>
+      <td>
+        <span id="host" name="host">{{ request.host }}</span
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <label for="status"><strong>Status</strong></label>
+      </td>
+      <td>
+        <span id="status" name="status">{{ request.status }}</span
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <label for="timestamp"><strong>Timestamp</strong></label>
+      </td>
+      <td>
+        <span id="timestamp" name="timestamp">{{ request.timestamp }}</span
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <label for="request_id"><strong>Request Id</strong></label>
+      </td>
+      <td>
+        <span id="request_id" name="request_id">{{ request.request_id }}</span
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <label for="job_id"><strong>Job Id</strong></label>
+      </td>
+      <td>
+        <span id="job_id" name="job_id">{{ request.job_id }}</span
+      </td>
+    </tr>
+  </table>
+  <br />
+  <table>
+    <tr>
+      <td>
+        <label for="env"><strong>Extra</strong></label>
+      </td>
+      <td>
+        <table>
+          {% for name, value in request.extra.iteritems() %}
+            <tr>
+              <td>
+                <label for="{{ name }}"><strong>{{ name }}</strong></label>
+              </td>
+              <td>
+                <span id="{{ value }}" name="{{ value }}">{{ value }}</span
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+      </td>
+    </tr>
+  </table>
+  <br />
+  <table>
+    <tr>
+      <td>
+        <label for="extra"><strong>Environment Variables</strong></label>
+      </td>
+      <td>
+        <table>
+          {% for name, value in request.environment.iteritems() %}
+            <tr>
+              <td>
+                <label for="{{ name }}"><strong>{{ name }}</strong></label>
+              </td>
+              <td>
+                <span id="{{ value }}" name="{{ value }}">{{ value }}</span
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+      </td>
+    </tr>
+  </table>
+  <br />
+  <table>
+    <tr>
+      <td>
+        <label for="headers"><strong>Response Headers</strong></label>
+      </td>
+      <td>
+        <table>
+          {% for name, value in headers.headers.iteritems() %}
+            <tr>
+              <td>
+                <label for="{{ name }}"><strong>{{ name }}</strong></label>
+              </td>
+              <td>
+                <span id="{{ value }}" name="{{ value }}">{{ value }}</span
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+      </td>
+    </tr>
+  </table>
+  <br />
+  <table>
+    <tr>
+      <td>
+        <label for="request_body"><strong>Request Body</strong></label>
+      </td>
+      <td>
+          <span id="request_body" name="request_body">{{ request_body.body }}</span
+      </td>
+    </tr>
+  </table>
+  <br />
+  <table>
+    <tr>
+      <td>
+        <label for="response"><strong>Response Body</strong></label>
+      </td>
+      <td>
+          <div id="response" name="response">
+            {% for res in response.response %}
+            <div>{{ res }}</div>
+            {% endfor %}
+          </div
+      </td>
+    </tr>
+  </table>
+  <br />
+  <table>
+    <tr>
+      <td>
+        <label for="traceback"><strong>Traceback</strong></label>
+      </td>
+      <td>
+          <div id="traceback" name="traceback">
+            {% for tb in traceback.traceback %}
+            <div>{{ tb }}</div>
+            {% endfor %}
+          </div
+      </td>
+    </tr>
+  </table>
 </div>
 {% endblock %}

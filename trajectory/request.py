@@ -18,9 +18,9 @@ import re
 from trajectory.providers import provider
 from trajectory.config import OPTIONS
 
-JOB_ID = OPTIONS.HEADER_PREFIX + "JOB_ID"
-PARENT_ID = OPTIONS.HEADER_PREFIX + "PARENT_ID"
-REQUEST_ID = OPTIONS.HEADER_PREFIX + "REQUEST_ID"
+JOB_ID = OPTIONS.HEADER_PREFIX.upper() + "_JOB_ID"
+PARENT_ID = OPTIONS.HEADER_PREFIX.upper() + "_PARENT_ID"
+REQUEST_ID = OPTIONS.HEADER_PREFIX.upper() + "_REQUEST_ID"
 HTTP_PREFIX = "HTTP_"
 HTTP_JOB_ID = HTTP_PREFIX + JOB_ID
 HTTP_PARENT_ID = HTTP_PREFIX + PARENT_ID
@@ -90,11 +90,43 @@ def setup_trajectory(env=None):
     _check_item_and_set_if_empty(env, REQUEST_ID, request_id)
 
 
-def send_trajectory(path_info, status_code=0):
+def send_trajectory(path_info, req_body="", headers=None, status_code=0,
+                    response=None, traceback=None):
     payload = build_payload(path_info, status_code)
+    payload["headers"] = _cleanup_headers(headers) if headers else {}
+    payload["body"] = req_body
+    payload["traceback"] = traceback or ""
+    payload["response"] = response if response else []
     payload = json.dumps(payload)
 
     provider.send(payload)
+
+
+def _cleanup_headers(headers):
+    if isinstance(headers, (list, tuple, set)):
+        cleaned = {}
+
+        for header in headers:
+            try:
+                cleaned[header[0]] = str(header[1])
+            except:
+                pass
+
+        return cleaned
+
+    return _cleanup_dict
+
+
+def _cleanup_dict(dct):
+    cleaned = {}
+
+    for k, v in dct.iteritems():
+        try:
+            cleaned[k] = str(v)
+        except:
+            pass
+
+    return cleaned
 
 
 def build_payload(path_info, status_code=0):
@@ -104,8 +136,5 @@ def build_payload(path_info, status_code=0):
     payload["host"] = os.environ.get("HTTP_HOST")
     # TODO: Add flag for custom info.
     payload["extra"] = get_env_info()
-    logging.info(30 * "@")
-    logging.info("PAYLOAD: %s" % (payload,))
-    logging.info(30 * "@")
 
     return payload
