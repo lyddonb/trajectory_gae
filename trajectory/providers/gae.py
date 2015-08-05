@@ -11,6 +11,7 @@
 # limitations under the License.
 #
 import json
+import os
 
 from collections import defaultdict
 
@@ -34,37 +35,114 @@ class Node(ndb.Model):
     status = ndb.IntegerProperty(indexed=True)
     extra = ndb.JsonProperty()
     timestamp = ndb.DateTimeProperty(auto_now_add=True)
+    environment = ndb.JsonProperty()
+
+
+class NodeRequestHeaders(ndb.Model):
+
+    headers = ndb.JsonProperty()
+
+
+class NodeRequestBody(ndb.Model):
+
+    body = ndb.TextProperty()
+
+
+class NodeResponseBody(ndb.Model):
+
+    response = ndb.JsonProperty()
+
+
+class NodeTracebackBody(ndb.Model):
+
+    traceback = ndb.JsonProperty()
+
+
+def _make_env():
+    env = {}
+    for k, v in os.environ.iteritems():
+        try:
+            env[k] = str(v)
+        except:
+            pass
+    return env
 
 
 def send_request(payload):
     payload = json.loads(payload)
 
-    add_node(payload["request_id"],
-             payload["job_id"],
-             payload["parent_id"],
-             payload["path"],
-             payload["host"],
-             payload["status"],
-             payload["extra"])
+    entities = []
+
+    request_id = payload["request_id"]
+    entities.append(create_node(request_id,
+                    payload["job_id"],
+                    payload["parent_id"],
+                    payload["path"],
+                    payload["host"],
+                    payload["status"],
+                    payload["extra"],
+                    _make_env()))
+
+    headers = payload.get("headers", {})
+
+    if headers:
+        entities.append(NodeRequestHeaders(id=request_id + ":headers",
+                                           headers=headers))
+
+    body = payload.get("body", "")
+
+    if body:
+        entities.append(NodeRequestBody(id=request_id + ":body", body=body))
+
+    response = payload.get("response", "")
+
+    if response:
+        entities.append(NodeResponseBody(id=request_id + ":response",
+                                         response=response))
+
+    traceback = payload.get("traceback", "")
+
+    if traceback:
+        entities.append(NodeTracebackBody(id=request_id + ":traceback",
+                                          traceback=traceback))
+
+    ndb.put_multi(entities)
 
 
 def get_request(request_id):
     return Node.get_by_id(request_id)
 
 
-def add_node_async(request_id, job_id, parent_id, path, host, status, extra):
+def get_all_request_parts(request_id):
+    return ndb.get_multi([
+        ndb.Key("Node", request_id),
+        ndb.Key("NodeRequestHeaders", request_id + ":headers"),
+        ndb.Key("NodeRequestBody", request_id + ":body"),
+        ndb.Key("NodeResponseBody", request_id + ":response"),
+        ndb.Key("NodeTracebackBody", request_id + ":traceback")
+    ])
+
+
+def create_node(request_id, job_id, parent_id, path, host, status, extra, env):
     return Node(id=request_id,
                 job_id=job_id,
                 parent_id=parent_id,
                 path=path,
                 host=host,
                 status=status,
-                extra=extra).put_async()
+                extra=extra or {},
+                environment=env or {})
 
 
-def add_node(request_id, job_id, parent_id, path, host, status, extra):
+def add_node_async(request_id, job_id, parent_id, path, host, status, extra,
+                   env):
+    return create_node(request_id, job_id, parent_id, path, host, status,
+                       extra, env).put_async()
+
+
+def add_node(request_id, job_id, parent_id, path, host, status, extra, env):
     return add_node_async(request_id, job_id, parent_id, path, host, status,
-                          extra).get_result()
+                          extra, env).get_result()
 
 
 def get_all_requests(limit=100, curs=None):
