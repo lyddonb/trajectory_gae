@@ -13,20 +13,26 @@
 
 import webapp2
 
-from handlers import UrlfetchHandler
-from handlers import UrllibHandler
+from handlers import ErrorHandler
 from handlers import HeirarchyURLChildHandler
 from handlers import HeirarchyURLParentHandler
-from handlers import TaskqueuHandler
+from handlers import MainHandler
+from handlers import MenuHandler
+from handlers import TaskqueueHandler
+from handlers import UrlfetchHandler
+from handlers import UrllibHandler
 
 config = {}
 
 app = webapp2.WSGIApplication([
+    ('/examples/', MenuHandler),
+    ('/examples/main', MainHandler),
     ('/examples/urlfetch', UrlfetchHandler),
     ('/examples/urllib', UrllibHandler),
     ('/examples/urlparent', HeirarchyURLParentHandler),
     ('/examples/urlchild', HeirarchyURLChildHandler),
-    ('/examples/taskqueue', TaskqueuHandler),
+    ('/examples/taskqueue', TaskqueueHandler),
+    ('/examples/error', ErrorHandler),
 ], config=config)
 
 # TODO: Add settings flag to enable trajectory.
